@@ -1,0 +1,58 @@
+{% extends 'crm/base.html' %}
+
+{% block title %}Purchase Details | SmartShop AI{% endblock %}
+
+{% block page_heading %}Purchase Details{% endblock %}
+
+{% block content %}
+
+<div class="form-container">
+
+    <h2>Purchase Receipt</h2>
+
+    <hr>
+
+    <p>
+        Purchase ID:
+        <strong>#{{ purchase.id }}</strong>
+    </p>
+
+    <p>
+        Customer:
+        <strong>{{ purchase.lead.customer.name }}</strong>
+    </p>
+
+    <p>
+        Phone:
+        <strong>{{ purchase.lead.customer.phone }}</strong>
+    </p>
+
+    <p>
+        Product:
+        <strong>{{ purchase.lead.product.name|default:"-" }}</strong>
+    </p>
+
+    <p>
+        Purchase Amount:
+        <strong>₹{{ purchase.amount }}</strong>
+    </p>
+
+    <p>
+        Payment Method:
+        <strong>{{ purchase.get_payment_method_display }}</strong>
+    </p>
+
+    <p>
+        Purchase Date:
+        <strong>{{ purchase.purchase_date|date:"d M Y" }}</strong>
+    </p>
+
+    <br>
+
+    <a href="{% url 'purchases' %}" class="primary-btn">
+        Back to Purchases
+    </a>
+
+</div>
+
+{% endblock %}

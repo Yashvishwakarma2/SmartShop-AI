@@ -1,0 +1,41 @@
+{% extends 'crm/base.html' %}
+
+{% block title %}Create Bank Application | SmartShop AI{% endblock %}
+
+{% block page_heading %}Create Bank Application{% endblock %}
+
+{% block content %}
+
+<div class="form-container">
+
+    <h2>New Bank Application</h2>
+
+    <p>
+        Customer:
+        <strong>{{ lead.customer.name }}</strong>
+    </p>
+
+    <p>
+        Product:
+        <strong>{{ lead.product.name|default:"Not selected" }}</strong>
+    </p>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit" class="primary-btn">
+            Submit Application Record
+        </button>
+
+        <a href="{% url 'banks' %}" class="cancel-btn">
+            Cancel
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}

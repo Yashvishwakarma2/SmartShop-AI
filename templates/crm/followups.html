@@ -1,0 +1,293 @@
+{% extends 'crm/base.html' %}
+
+{% block title %}Follow-ups | SmartShop AI{% endblock %}
+
+{% block page_heading %}Follow-up Management{% endblock %}
+
+{% block content %}
+
+<div class="welcome">
+    <h2>Customer Follow-ups 🔔</h2>
+    <p>Never miss an opportunity to reconnect with an interested customer.</p>
+</div>
+
+{% if messages %}
+    <div style="margin-bottom: 20px;">
+        {% for message in messages %}
+            <div class="message-box" style="margin-top:0;">{{ message }}</div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% if today_followups %}
+<!-- 🔔 Today's Follow-up Pop-up Reminder Modal -->
+<div id="todayReminderModal" class="reminder-modal-overlay">
+    <div class="reminder-modal">
+        <div class="reminder-modal-header">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div class="reminder-bell-icon">
+                    <i class="fa-solid fa-bell"></i>
+                </div>
+                <div>
+                    <h3 style="margin:0; font-size:18px; color:#1e293b;">Today's Follow-up Reminder! 🔔</h3>
+                    <p style="margin:3px 0 0 0; font-size:13px; color:#64748b;">
+                        You have <strong>{{ today_followups.count }}</strong> customer follow-up(s) scheduled for today.
+                    </p>
+                </div>
+            </div>
+            <button type="button" class="reminder-close-btn" onclick="closeReminderModal()">&times;</button>
+        </div>
+
+        <div class="reminder-modal-body">
+            {% for item in today_followups %}
+            <div class="reminder-item-card">
+                <div class="reminder-item-info">
+                    <strong><i class="fa-solid fa-user"></i> {{ item.lead.customer.name }}</strong>
+                    <span><i class="fa-solid fa-box"></i> {{ item.lead.product.name|default:"General Inquiry" }}</span>
+                    {% if item.message %}
+                        <p><i class="fa-solid fa-comment-dots"></i> {{ item.message }}</p>
+                    {% endif %}
+                </div>
+                <div class="reminder-item-actions">
+                    <a href="{% url 'add_call_log' item.lead.id %}" class="btn btn-primary" style="padding:7px 14px; font-size:13px;">
+                        <i class="fa-solid fa-phone"></i> Call
+                    </a>
+                    <form method="POST" action="{% url 'complete_followup' item.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn" style="padding:7px 14px; font-size:13px; background:#16a34a; color:#fff;">
+                            <i class="fa-solid fa-check"></i> Complete
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="reminder-modal-footer">
+            <button type="button" class="btn" style="background:#e2e8f0; color:#334155; padding:8px 18px;" onclick="closeReminderModal()">
+                Dismiss Reminder
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function closeReminderModal() {
+        const modal = document.getElementById('todayReminderModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+</script>
+{% endif %}
+
+<div class="stats-grid">
+
+    <div class="stat-card">
+        <i class="fa-solid fa-bell"></i>
+        <h4>Pending Reminders</h4>
+        <h2>{{ total_pending }}</h2>
+    </div>
+
+    <div class="stat-card">
+        <i class="fa-solid fa-clock"></i>
+        <h4>Overdue</h4>
+        <h2>{{ overdue.count }}</h2>
+    </div>
+
+    <div class="stat-card">
+        <i class="fa-solid fa-calendar-day"></i>
+        <h4>Today's Follow-ups</h4>
+        <h2>{{ today_followups.count }}</h2>
+    </div>
+
+</div>
+
+
+<!-- Overdue -->
+
+<div class="table-container">
+
+    <h3>🔴 Overdue Follow-ups</h3>
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>Customer</th>
+                <th>Product</th>
+                <th>Reminder Date</th>
+                <th>Message</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for item in overdue %}
+
+            <tr>
+                <td>{{ item.lead.customer.name }}</td>
+
+                <td>{{ item.lead.product.name|default:"-" }}</td>
+
+                <td>{{ item.reminder_date }}</td>
+
+                <td>{{ item.message }}</td>
+
+                <td>
+
+                    <a href="{% url 'add_call_log' item.lead.id %}"
+                       class="primary-btn">
+                        Call Customer
+                    </a>
+
+                    <form method="POST"
+                          action="{% url 'complete_followup' item.id %}"
+                          style="display:inline;">
+
+                        {% csrf_token %}
+
+                        <button type="submit">
+                            Completed
+                        </button>
+
+                    </form>
+
+                </td>
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="5">No overdue reminders.</td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<!-- Today's Follow-ups -->
+
+<div class="table-container">
+
+    <h3>🟡 Today's Follow-ups</h3>
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>Customer</th>
+                <th>Product</th>
+                <th>Reminder Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for item in today_followups %}
+
+            <tr>
+
+                <td>{{ item.lead.customer.name }}</td>
+
+                <td>{{ item.lead.product.name|default:"-" }}</td>
+
+                <td>{{ item.reminder_date }}</td>
+
+                <td>
+
+                    <a href="{% url 'add_call_log' item.lead.id %}"
+                       class="primary-btn">
+                        Call Customer
+                    </a>
+
+                    <form method="POST"
+                          action="{% url 'complete_followup' item.id %}"
+                          style="display:inline;">
+
+                        {% csrf_token %}
+
+                        <button type="submit">
+                            Completed
+                        </button>
+
+                    </form>
+
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="4">No follow-ups scheduled for today.</td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<!-- Upcoming -->
+
+<div class="table-container">
+
+    <h3>🟢 Upcoming Follow-ups</h3>
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>Customer</th>
+                <th>Product</th>
+                <th>Reminder Date</th>
+                <th>Message</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for item in upcoming %}
+
+            <tr>
+                <td>{{ item.lead.customer.name }}</td>
+                <td>{{ item.lead.product.name|default:"-" }}</td>
+                <td>{{ item.reminder_date }}</td>
+                <td>{{ item.message }}</td>
+                <td>
+                    <form method="POST" action="{% url 'move_followup_today' item.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn" style="background:#eab308; color:#fff; padding:6px 14px; font-size:12px;">
+                            <i class="fa-solid fa-calendar-day"></i> Move to Today
+                        </button>
+                    </form>
+                </td>
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="5">No upcoming reminders.</td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

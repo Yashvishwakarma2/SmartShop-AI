@@ -1,0 +1,118 @@
+{% extends 'crm/base.html' %}
+
+{% block title %}Purchases | SmartShop AI{% endblock %}
+
+{% block page_heading %}Purchase Management{% endblock %}
+
+{% block content %}
+
+<div class="welcome">
+    <h2>Purchase & Sales Management 🛒</h2>
+    <p>Track completed purchases and manage your shop sales.</p>
+</div>
+
+<!-- Statistics -->
+
+<div class="stats-grid">
+
+    <div class="stat-card">
+        <i class="fa-solid fa-cart-shopping"></i>
+        <h4>Total Purchases</h4>
+        <h2>{{ total_purchases }}</h2>
+    </div>
+
+    <div class="stat-card">
+        <i class="fa-solid fa-indian-rupee-sign"></i>
+        <h4>Total Revenue</h4>
+        <h2>₹{{ total_revenue|floatformat:2 }}</h2>
+    </div>
+
+</div>
+
+
+<!-- Purchase Table -->
+
+<div class="table-container">
+
+    <h3>Purchase History</h3>
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>Purchase ID</th>
+                <th>Customer</th>
+                <th>Product</th>
+                <th>Amount</th>
+                <th>Payment Method</th>
+                <th>Purchase Date</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for purchase in purchases %}
+
+            <tr>
+
+                <td>#{{ purchase.id }}</td>
+
+                <td>
+                    {{ purchase.lead.customer.name }}
+                </td>
+
+                <td>
+                    {{ purchase.lead.product.name|default:"-" }}
+                </td>
+
+                <td>
+                    ₹{{ purchase.amount }}
+                </td>
+
+                <td>
+                    {{ purchase.get_payment_method_display }}
+                </td>
+
+                <td>
+                    {{ purchase.purchase_date|date:"d M Y" }}
+                </td>
+
+                <td>
+                    <a href="{% url 'purchase_detail' purchase.id %}"
+                       class="primary-btn">
+                        View
+                    </a>
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="7">
+                    No purchases recorded yet.
+                </td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% if messages %}
+
+    {% for message in messages %}
+
+        <div class="message-box">
+            {{ message }}
+        </div>
+
+    {% endfor %}
+
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'crm/base.html' %}
+
+{% block title %}Dashboard | SmartShop AI{% endblock %}
+
+{% block page_heading %}Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="welcome">
+    <h2>Welcome to SmartShop AI 👋</h2>
+    <p>Manage customers, leads, follow-ups and purchases from one place.</p>
+</div>
+
+<div class="stats-grid">
+
+    <div class="stat-card">
+        <i class="fa-solid fa-users"></i>
+        <h4>Total Customers</h4>
+        <h2>{{ total_customers|default:0 }}</h2>
+    </div>
+
+    <div class="stat-card">
+        <i class="fa-solid fa-bullseye"></i>
+        <h4>Total Leads</h4>
+        <h2>{{ total_leads|default:0 }}</h2>
+    </div>
+
+    <div class="stat-card">
+        <i class="fa-solid fa-bell"></i>
+        <h4>Pending Follow-ups</h4>
+        <h2>{{ pending_followups|default:0 }}</h2>
+    </div>
+
+    <div class="stat-card">
+        <i class="fa-solid fa-cart-shopping"></i>
+        <h4>Total Purchases</h4>
+        <h2>{{ total_purchases|default:0 }}</h2>
+    </div>
+    
+    <div class="stat-card">
+        <i class="fa-solid fa-indian-rupee-sign"></i>
+        <h4>Total Revenue</h4>
+        <h2>₹{{ total_revenue|floatformat:2 }}</h2>
+    </div>
+
+</div>
+
+<div class="dashboard-section">
+
+    <h3>Quick Actions</h3>
+
+    <div class="quick-actions">
+
+        <a href="{% url 'customers' %}" class="action-card">
+            <i class="fa-solid fa-user-plus"></i>
+            <h4>Add Customer</h4>
+            <p>Register a new customer.</p>
+        </a>
+
+        <a href="{% url 'leads' %}" class="action-card">
+            <i class="fa-solid fa-bullseye"></i>
+            <h4>Create Lead</h4>
+            <p>Track customer interest.</p>
+        </a>
+
+        <a href="{% url 'followups' %}" class="action-card">
+            <i class="fa-solid fa-phone"></i>
+            <h4>Follow-up</h4>
+            <p>Contact interested customers.</p>
+        </a>
+
+        <a href="{% url 'purchases' %}" class="action-card">
+            <i class="fa-solid fa-bag-shopping"></i>
+            <h4>Record Purchase</h4>
+            <p>Manage completed sales.</p>
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

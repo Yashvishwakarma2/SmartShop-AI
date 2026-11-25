@@ -1,0 +1,88 @@
+{% extends 'crm/base.html' %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="card">
+
+        <div class="card-header">
+            <h3>Upload Customer Document</h3>
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST"
+                  enctype="multipart/form-data">
+
+                {% csrf_token %}
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Select Customer Lead
+                    </label>
+
+                    <select name="lead_id"
+                            class="form-control"
+                            required>
+
+                        <option value="">
+                            Select Lead
+                        </option>
+
+                        {% for lead in leads %}
+
+                        <option value="{{ lead.id }}"
+                            {% if selected_lead_id == lead.id|stringformat:"s" %}
+                                selected
+                            {% endif %}>
+
+                            {{ lead.customer.name }} -
+                            {{ lead.product.name|default:"No Product" }}
+
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <div class="mb-3">
+                    <label>Document Name</label>
+                    {{ form.document_name }}
+                </div>
+
+
+                <div class="mb-3">
+                    <label>Upload File</label>
+                    {{ form.document_file }}
+                </div>
+
+
+                <div class="mb-3">
+                    <label>Remarks</label>
+                    {{ form.remarks }}
+                </div>
+
+
+                <button type="submit" class="btn btn-success">
+                    Upload Document
+                </button>
+
+                <a href="{% url 'documents' %}"
+                   class="btn btn-secondary">
+                    Cancel
+                </a>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

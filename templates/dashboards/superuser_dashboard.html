@@ -1,0 +1,476 @@
+{% extends 'crm/base.html' %}
+
+{% block title %}Superuser Dashboard{% endblock %}
+
+{% block page_heading %}Superuser Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-welcome">
+    <h2>Welcome, Administrator!</h2>
+    {% if shop %}
+        <p>Viewing data for shop: <strong>{{ shop.name }}</strong> &mdash; only your shop's data is shown.</p>
+    {% else %}
+        <div style="background:#fef9c3; border:1px solid #fde047; border-radius:10px; padding:16px 20px; margin-top:12px;">
+            <strong>⚠️ Shop not set up yet.</strong>
+            <p style="margin:6px 0 0;">
+                You have not created your shop/organization yet.
+                All stats will show <strong>0</strong> until you set up your shop.
+                <a href="{% url 'shop_register' %}" style="color:#1765df; font-weight:600;">
+                    → Set Up Your Shop Now
+                </a>
+            </p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- ── Dashboard Access Codes ── -->
+<div class="dashboard-section dashboard-access-codes">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+            <h3 style="margin:0 0 6px 0;">Static Dashboard Access Keys</h3>
+            <p style="margin:0; color:#64748b;">Each code is static and unlocks only its dedicated dashboard.</p>
+        </div>
+    </div>
+
+    {% if messages %}
+        <div style="margin-top:15px;">
+        {% for message in messages %}
+            <p class="access-code-message">{{ message }}</p>
+        {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="stats-grid" style="margin-top:20px;">
+        {% for value, label, access_code in dashboard_choices %}
+        <div class="stat-card" style="border:1px solid #e2e8f0;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h4 style="margin:0;">{{ label }}</h4>
+                <span class="badge-count" style="font-size:11px; margin:0;">Static Key</span>
+            </div>
+            <strong class="access-code-value" style="margin:14px 0 8px 0; font-size:24px; color:#2563eb; letter-spacing:0.05em;">
+                {{ access_code.code }}
+            </strong>
+            <small style="color:#64748b; display:block; margin-bottom:12px;">Only logs in to {{ label }}</small>
+            <form method="post" style="display:flex; gap:6px;">
+                {% csrf_token %}
+                <input type="hidden" name="dashboard" value="{{ value }}">
+                <input type="text" name="custom_code" placeholder="Change code" maxlength="12" style="padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:12px; flex:1; text-transform:uppercase;">
+                <button type="submit" class="btn btn-primary" style="padding:6px 12px; font-size:12px;">Update</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ── Global Summary ── -->
+<div class="dashboard-section">
+    <h3>Global Summary</h3>
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <h4>Total Shops</h4>
+            <h2>{{ total_shops }}</h2>
+        </div>
+
+        <div class="stat-card">
+            <h4>Total Staff Users</h4>
+            <h2>{{ total_users }}</h2>
+        </div>
+
+        <div class="stat-card">
+            <h4>Total Customers</h4>
+            <h2>{{ total_customers }}</h2>
+        </div>
+
+        <div class="stat-card">
+            <h4>Total Revenue</h4>
+            <h2>₹{{ total_revenue }}</h2>
+        </div>
+
+    </div>
+</div>
+
+<!-- ── Lead Dashboard Section (interconnected) ── -->
+<div class="dashboard-section">
+    <div class="section-header" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+        <h3 style="margin:0;">
+            <i class="fa-solid fa-bullseye"></i>
+            Lead Dashboard
+            <span class="badge-count">{{ total_leads }} Total</span>
+        </h3>
+        <div style="display:flex; gap:8px;">
+            <a href="{% url 'add_lead' %}" class="btn" style="background:#eff6ff; color:#1765df; border:1px solid #bfdbfe;">+ Create Lead</a>
+            <a href="{% url 'lead_dashboard' %}" class="btn btn-primary">Open Lead Dashboard →</a>
+        </div>
+    </div>
+
+    {% if lead_staff_users %}
+    <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:10px 14px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+        <div style="font-size:13px; color:#0369a1;">
+            <strong>Current Lead Dashboards:</strong>
+            {% for sp in lead_staff_users %}
+                <a href="{% url 'lead_dashboard' %}?staff_id={{ sp.user.id }}" style="display:inline-block; margin-left:6px; padding:3px 10px; background:white; border:1px solid #7dd3fc; border-radius:12px; color:#0284c7; text-decoration:none; font-weight:600; font-size:12px;">
+                    {{ sp.user.username }} ({{ sp.assigned_leads_count }} leads)
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="stats-grid">
+
+        <a href="{% url 'lead_dashboard' %}" class="stat-card stat-card-link">
+            <h4>Total Leads</h4>
+            <h2>{{ total_leads }}</h2>
+            <small>Leads for your shop</small>
+        </a>
+
+        <a href="{% url 'lead_dashboard' %}" class="stat-card stat-card-link">
+            <h4>Total Customers</h4>
+            <h2>{{ total_customers }}</h2>
+            <small>Registered customers</small>
+        </a>
+
+        <a href="{% url 'lead_dashboard' %}" class="stat-card stat-card-link">
+            <h4>New Leads</h4>
+            <h2>{{ new_leads }}</h2>
+            <small>Status: New</small>
+        </a>
+
+        <a href="{% url 'lead_dashboard' %}" class="stat-card stat-card-link">
+            <h4>Interested</h4>
+            <h2>{{ interested_leads }}</h2>
+            <small>Status: Interested</small>
+        </a>
+
+        <a href="{% url 'lead_dashboard' %}" class="stat-card stat-card-link">
+            <h4>Follow-ups</h4>
+            <h2>{{ followup_leads }}</h2>
+            <small>Status: Follow-up</small>
+        </a>
+
+        <a href="{% url 'lead_dashboard' %}" class="stat-card stat-card-link">
+            <h4>Converted</h4>
+            <h2>{{ converted_leads }}</h2>
+            <small>Status: Converted</small>
+        </a>
+
+        <a href="{% url 'lead_dashboard' %}" class="stat-card stat-card-link">
+            <h4>Lost</h4>
+            <h2>{{ lost_leads }}</h2>
+            <small>Status: Lost</small>
+        </a>
+
+    </div>
+</div>
+
+<!-- ── Document Dashboard Section (interconnected) ── -->
+<div class="dashboard-section">
+    <div class="section-header" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+        <h3 style="margin:0;">
+            <i class="fa-solid fa-file-lines"></i>
+            Document Dashboard
+            <span class="badge-count">{{ total_documents }} Total</span>
+        </h3>
+        <a href="{% url 'document_dashboard' %}" class="btn btn-primary">Open Document Dashboard →</a>
+    </div>
+    <div class="stats-grid">
+
+        <a href="{% url 'document_dashboard' %}" class="stat-card stat-card-link">
+            <h4>Total Documents</h4>
+            <h2>{{ total_documents }}</h2>
+            <small>Documents for your shop</small>
+        </a>
+
+        <a href="{% url 'document_dashboard' %}" class="stat-card stat-card-link">
+            <h4>Pending</h4>
+            <h2>{{ pending_documents }}</h2>
+            <small>Awaiting review</small>
+        </a>
+
+        <a href="{% url 'document_dashboard' %}" class="stat-card stat-card-link">
+            <h4>Verified</h4>
+            <h2>{{ verified_documents }}</h2>
+            <small>Approved documents</small>
+        </a>
+
+        <a href="{% url 'document_dashboard' %}" class="stat-card stat-card-link">
+            <h4>Rejected</h4>
+            <h2>{{ rejected_documents }}</h2>
+            <small>Rejected documents</small>
+        </a>
+
+        <a href="{% url 'document_dashboard' %}" class="stat-card stat-card-link">
+            <h4>Needs Correction</h4>
+            <h2>{{ correction_documents }}</h2>
+            <small>Correction required</small>
+        </a>
+
+    </div>
+</div>
+
+<!-- ── Bank Dashboard Section (interconnected) ── -->
+<div class="dashboard-section">
+    <div class="section-header" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+        <h3 style="margin:0;">
+            <i class="fa-solid fa-building-columns"></i>
+            Bank Dashboard
+            <span class="badge-count">{{ total_bank_applications }} Total</span>
+        </h3>
+        <a href="{% url 'bank_dashboard' %}" class="btn btn-primary">Open Bank Dashboard →</a>
+    </div>
+    <div class="stats-grid">
+
+        <a href="{% url 'bank_dashboard' %}" class="stat-card stat-card-link">
+            <h4>Total Applications</h4>
+            <h2>{{ total_bank_applications }}</h2>
+            <small>Applications for your shop</small>
+        </a>
+
+        <a href="{% url 'bank_dashboard' %}" class="stat-card stat-card-link">
+            <h4>Pending</h4>
+            <h2>{{ pending_applications }}</h2>
+            <small>Awaiting review</small>
+        </a>
+
+        <a href="{% url 'bank_dashboard' %}" class="stat-card stat-card-link">
+            <h4>Under Review</h4>
+            <h2>{{ review_applications }}</h2>
+            <small>Being processed</small>
+        </a>
+
+        <a href="{% url 'bank_dashboard' %}" class="stat-card stat-card-link">
+            <h4>Approved</h4>
+            <h2>{{ approved_applications }}</h2>
+            <small>Loan approved</small>
+        </a>
+
+        <a href="{% url 'bank_dashboard' %}" class="stat-card stat-card-link">
+            <h4>Rejected</h4>
+            <h2>{{ rejected_applications }}</h2>
+            <small>Loan rejected</small>
+        </a>
+
+        <a href="{% url 'bank_dashboard' %}" class="stat-card stat-card-link">
+            <h4>Total Loan Amount</h4>
+            <h2>₹{{ total_loan_amount }}</h2>
+            <small>All approved loans</small>
+        </a>
+
+    </div>
+</div>
+
+<!-- ── Purchases Section (interconnected) ── -->
+<div class="dashboard-section">
+    <div class="section-header" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+        <h3 style="margin:0;">
+            <i class="fa-solid fa-cart-shopping"></i>
+            Purchases
+            <span class="badge-count">{{ total_purchases }} Total</span>
+        </h3>
+        <a href="{% url 'purchases' %}" class="btn btn-primary">View All Purchases →</a>
+    </div>
+    <div class="stats-grid">
+
+        <a href="{% url 'purchases' %}" class="stat-card stat-card-link">
+            <h4>Total Purchases</h4>
+            <h2>{{ total_purchases }}</h2>
+            <small>Completed sales</small>
+        </a>
+
+        <a href="{% url 'purchases' %}" class="stat-card stat-card-link">
+            <h4>Total Revenue</h4>
+            <h2>₹{{ total_revenue }}</h2>
+            <small>For your shop</small>
+        </a>
+
+    </div>
+</div>
+
+<!-- ── Associated Dashboard Users ── -->
+<div class="dashboard-section">
+    <div class="section-header" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+        <h3 style="margin:0;">
+            <i class="fa-solid fa-users"></i>
+            Associated Dashboard Users
+            <span class="badge-count">{{ total_users }} Total</span>
+        </h3>
+        <a href="{% url 'signup' %}" class="btn btn-primary">+ Add User →</a>
+    </div>
+
+    {% if not shop %}
+    <p style="color:#94a3b8; text-align:center; padding:20px;">
+        Set up your shop first to see associated users.
+    </p>
+    {% else %}
+
+    <!-- Lead Dashboard Users -->
+    <div style="margin-bottom:18px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+            <h4 style="color:#1765df; margin:0; display:flex; align-items:center; gap:8px;">
+                <i class="fa-solid fa-bullseye"></i>
+                Lead Dashboard Users
+                <span class="badge-count" style="font-size:11px;">{{ lead_staff_users|length }}</span>
+            </h4>
+            <button type="button" class="btn btn-primary" onclick="document.getElementById('createLeadModal').style.display='flex';" style="font-size:12px; padding:6px 14px; cursor:pointer;">
+                + Create Lead Dashboard
+            </button>
+        </div>
+        {% if lead_staff_users %}
+        <div class="stats-grid">
+            {% for sp in lead_staff_users %}
+            <div class="stat-card" style="padding:16px 18px; border: 1.5px solid #dbe3ef; border-radius: 10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <strong style="display:block; font-size:16px; color:#1e293b;">{{ sp.user.username }}</strong>
+                    <span style="display:inline-block; padding:2px 10px; border-radius:20px; font-size:11px; background:#dbeafe; color:#1765df; font-weight:600;">Lead Dashboard</span>
+                </div>
+                <small style="color:#64748b; display:block; margin: 4px 0 10px;">{{ sp.user.email|default:"No email" }}</small>
+                
+                <div style="display:flex; gap:12px; margin-bottom:12px; background:#f8fafc; padding:8px 12px; border-radius:8px;">
+                    <div>
+                        <span style="font-size:11px; color:#64748b; display:block;">Assigned Leads</span>
+                        <strong style="color:#1765df; font-size:16px;">{{ sp.assigned_leads_count }}</strong>
+                    </div>
+                    <div>
+                        <span style="font-size:11px; color:#64748b; display:block;">Customers</span>
+                        <strong style="color:#059669; font-size:16px;">{{ sp.assigned_customers_count }}</strong>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <a href="{% url 'lead_dashboard' %}?staff_id={{ sp.user.id }}" class="btn btn-primary" style="padding:6px 10px; font-size:12px; flex:1; text-align:center;">
+                        View Dashboard →
+                    </a>
+                    <a href="{% url 'add_lead' %}?assigned_to={{ sp.user.id }}" class="btn" style="padding:6px 10px; font-size:12px; background:#eff6ff; color:#1765df; border:1px solid #bfdbfe;">
+                        + Create Lead
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color:#94a3b8; padding:10px 0;">No Lead Dashboard users linked to your shop yet.</p>
+        {% endif %}
+    </div>
+
+    <!-- Document Dashboard Users -->
+    <div style="margin-bottom:18px;">
+        <h4 style="color:#059669; margin:0 0 10px; display:flex; align-items:center; gap:8px;">
+            <i class="fa-solid fa-file-lines"></i>
+            Document Dashboard Users
+            <span class="badge-count" style="font-size:11px;">{{ document_staff_users|length }}</span>
+        </h4>
+        {% if document_staff_users %}
+        <div class="stats-grid">
+            {% for sp in document_staff_users %}
+            <div class="stat-card" style="padding:14px 16px;">
+                <strong style="display:block; color:#1e293b;">{{ sp.user.username }}</strong>
+                <small style="color:#64748b;">{{ sp.user.email|default:"No email" }}</small>
+                <span style="display:inline-block; margin-top:6px; padding:2px 10px; border-radius:20px; font-size:11px; background:#d1fae5; color:#059669;">Document Manager</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color:#94a3b8; padding:10px 0;">No Document Dashboard users linked to your shop yet.</p>
+        {% endif %}
+    </div>
+
+    <!-- Bank Dashboard Users -->
+    <div>
+        <h4 style="color:#d97706; margin:0 0 10px; display:flex; align-items:center; gap:8px;">
+            <i class="fa-solid fa-building-columns"></i>
+            Bank Dashboard Users
+            <span class="badge-count" style="font-size:11px;">{{ bank_staff_users|length }}</span>
+        </h4>
+        {% if bank_staff_users %}
+        <div class="stats-grid">
+            {% for sp in bank_staff_users %}
+            <div class="stat-card" style="padding:14px 16px;">
+                <strong style="display:block; color:#1e293b;">{{ sp.user.username }}</strong>
+                <small style="color:#64748b;">{{ sp.user.email|default:"No email" }}</small>
+                <span style="display:inline-block; margin-top:6px; padding:2px 10px; border-radius:20px; font-size:11px; background:#fef3c7; color:#d97706;">Bank Manager</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color:#94a3b8; padding:10px 0;">No Bank Dashboard users linked to your shop yet.</p>
+        {% endif %}
+    </div>
+
+    {% endif %}
+</div>
+
+<!-- ── All Customers Table ── -->
+<div class="dashboard-welcome">
+    <h2>All Customers</h2>
+    <p>Customers registered for your shop.</p>
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Customer Name</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Shop</th>
+                <th>Registered Date</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for customer in customers %}
+            <tr>
+                <td>{{ customer.name }}</td>
+                <td>{{ customer.phone }}</td>
+                <td>{{ customer.email|default:"-" }}</td>
+                <td>{{ customer.shop.name }}</td>
+                <td>{{ customer.created_at|date:"d M Y" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">No customers registered yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal: Create Lead Dashboard User -->
+<div id="createLeadModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
+    <div style="background:white; border-radius:12px; padding:28px; width:min(450px, 92%); box-shadow:0 10px 30px rgba(0,0,0,0.25);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <h3 style="margin:0; color:#1e293b;">Create Lead Dashboard</h3>
+            <button type="button" onclick="document.getElementById('createLeadModal').style.display='none';" style="background:none; border:none; font-size:20px; cursor:pointer; color:#64748b;">&times;</button>
+        </div>
+        <p style="color:#64748b; font-size:13px; margin:0 0 18px 0;">
+            This new Lead Dashboard user will automatically be attached to <strong>{{ shop.name }}</strong>.
+        </p>
+        <form method="POST" action="{% url 'create_lead_dashboard_user' %}">
+            {% csrf_token %}
+            <div style="margin-bottom:14px;">
+                <label style="display:block; font-size:13px; font-weight:600; margin-bottom:5px;">Username *</label>
+                <input type="text" name="username" placeholder="e.g. nancy_lead2" required style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
+            </div>
+            <div style="margin-bottom:14px;">
+                <label style="display:block; font-size:13px; font-weight:600; margin-bottom:5px;">Email (Optional)</label>
+                <input type="email" name="email" placeholder="agent@example.com" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
+            </div>
+            <div style="margin-bottom:20px;">
+                <label style="display:block; font-size:13px; font-weight:600; margin-bottom:5px;">Password *</label>
+                <input type="password" name="password" placeholder="Enter password" required style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" onclick="document.getElementById('createLeadModal').style.display='none';" style="background:#f1f5f9; color:#475569; padding:9px 16px; border-radius:6px; border:none; cursor:pointer; font-weight:500;">
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-primary" style="padding:9px 18px; border-radius:6px; cursor:pointer;">
+                    Create &amp; Add Dashboard
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

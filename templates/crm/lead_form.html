@@ -1,0 +1,37 @@
+{% extends 'crm/base.html' %}
+
+{% block title %}Create Lead | SmartShop AI{% endblock %}
+
+{% block page_heading %}Create New Lead{% endblock %}
+
+{% block content %}
+
+<div class="form-container">
+
+    <h2>Create Customer Lead</h2>
+
+    <p>Enter customer interest and purchase information.</p>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <div class="lead-form-fields">
+
+            {{ form.as_p }}
+
+        </div>
+
+        <button type="submit" class="primary-btn">
+            Save Lead
+        </button>
+
+        <a href="{% url 'leads' %}" class="cancel-btn">
+            Cancel
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}

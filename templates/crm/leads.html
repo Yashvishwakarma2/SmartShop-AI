@@ -1,0 +1,216 @@
+{% extends 'crm/base.html' %}
+
+{% block title %}Lead Management | SmartShop AI{% endblock %}
+
+{% block page_heading %}Lead Management{% endblock %}
+
+{% block content %}
+
+<div class="welcome">
+    <h2>Customer Leads 🎯</h2>
+    <p>Track interested customers and their expected purchase dates.</p>
+</div>
+
+<div class="stat-card">
+    <h3>Total Leads: {{ total_leads }}</h3>
+</div>
+
+<div class="table-container">
+
+    <div class="table-header">
+
+        <form method="GET">
+
+            <input
+                type="text"
+                name="search"
+                placeholder="Search customer name..."
+                value="{{ request.GET.search|default:'' }}"
+            >
+
+            <button type="submit">Search</button>
+
+        </form>
+
+        <a href="{% url 'add_lead' %}" class="primary-btn">
+            + Create New Lead
+        </a>
+
+    </div>
+
+    {% if filter_staff %}
+    <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:10px 16px; margin-bottom:14px; font-size:13px; color:#0369a1;">
+        Showing leads assigned to Lead Dashboard: <strong>{{ filter_staff.username }}</strong>
+        &nbsp;&bull;&nbsp;
+        <a href="{% url 'leads' %}" style="color:#0284c7; font-weight:600;">Show All Leads</a>
+    </div>
+    {% endif %}
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Customer</th>
+                <th>Product</th>
+                <th>Assigned Dashboard</th>
+                <th>Expected Purchase</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Update Status</th>
+                <th>Documents</th>
+                <th>Bank Application</th>
+                <th>Purchase</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for lead in leads %}
+
+            <tr>
+
+                <td>{{ lead.id }}</td>
+
+                <td>{{ lead.customer.name }}</td>
+
+                <td>
+                    {{ lead.product.name|default:"Not selected" }}
+                </td>
+
+                <td>
+                    <span style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:12px; font-size:12px; font-weight:600;">
+                        {{ lead.assigned_to.username|default:"Unassigned" }}
+                    </span>
+                </td>
+
+                <td>
+                    {{ lead.expected_purchase_date|default:"Not decided" }}
+                </td>
+
+                <td>
+                    <span class="lead-status">
+                        {{ lead.get_status_display }}
+                    </span>
+                </td>
+
+                <td>{{ lead.created_at|date:"d M Y" }}</td>
+
+                <td>
+
+                    <form method="POST" action="{% url 'update_lead_status' lead.id %}">
+                        {% csrf_token %}
+                        <select name="status" class="form-control">
+                            {% for value, label in status_choices %}
+                                <option value="{{ value }}" {% if lead.status == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-success">
+                            Update
+                        </button>
+                    </form>
+
+                </td>
+
+                <td>
+                    {% with doc_badge=lead.document_status_badge %}
+                    <div style="margin-bottom:6px;">
+                        <span style="display:inline-flex; align-items:center; gap:4px; background:{{ doc_badge.bg }}; color:{{ doc_badge.color }}; border:1px solid {{ doc_badge.color }}33; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:600;">
+                            <i class="fa-solid fa-{{ doc_badge.icon }}" style="font-size:10px;"></i>
+                            {{ doc_badge.label }}
+                        </span>
+                        {% if doc_badge.doc_name %}
+                        <div style="font-size:11px; color:#64748b; margin-top:2px;">{{ doc_badge.doc_name }}</div>
+                        {% endif %}
+                    </div>
+                    {% endwith %}
+                    <a href="{% url 'documents' %}" class="primary-btn" style="padding:3px 8px; font-size:11px;">
+                        Manage
+                    </a>
+                </td>
+
+                <td>
+                    {% with bank_badge=lead.bank_status_badge %}
+                    <div style="margin-bottom:6px;">
+                        <span style="display:inline-flex; align-items:center; gap:4px; background:{{ bank_badge.bg }}; color:{{ bank_badge.color }}; border:1px solid {{ bank_badge.color }}33; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:600;">
+                            <i class="fa-solid fa-{{ bank_badge.icon }}" style="font-size:10px;"></i>
+                            {{ bank_badge.label }}
+                        </span>
+                        {% if bank_badge.bank_name %}
+                        <div style="font-size:11px; color:#64748b; margin-top:2px;">{{ bank_badge.bank_name }}{% if bank_badge.loan_amount %} &bull; ₹{{ bank_badge.loan_amount }}{% endif %}</div>
+                        {% endif %}
+                    </div>
+                    {% endwith %}
+
+                    {% if lead.status != 'LOST' and lead.status != 'CONVERTED' %}
+                        {% if not lead.bankapplication %}
+                            <a href="{% url 'add_bank_application' lead.id %}" class="primary-btn" style="padding:3px 8px; font-size:11px;">
+                                Apply
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+
+                    <td>
+
+                            {% if lead.status == 'CONVERTED' %}
+
+                                <span class="lead-status">Purchased</span>
+
+                            {% else %}
+
+                                {% if lead.status != 'LOST' %}
+
+                                    <a href="{% url 'add_purchase' lead.id %}"
+                                    class="primary-btn">
+                                        Complete Purchase
+                                    </a>
+
+                                {% else %}
+
+                                    -
+
+                                {% endif %}
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+                            <form method="POST"
+                                action="{% url 'delete_lead' lead.id %}"
+                                onsubmit="return confirm('Are you sure you want to delete this lead?');">
+
+                                {% csrf_token %}
+
+                                <button type="submit" class="delete-lead-btn">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+
+                            </form>
+                        </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="7">
+                    No leads available. Create your first lead!
+                </td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

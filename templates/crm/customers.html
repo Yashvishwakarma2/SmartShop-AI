@@ -1,0 +1,75 @@
+{% extends 'crm/base.html' %}
+
+{% block title %}Customers | SmartShop AI{% endblock %}
+
+{% block page_heading %}Customer Management{% endblock %}
+
+{% block content %}
+
+<div class="welcome">
+    <h2>Customer Management</h2>
+    <p>Manage and track all your shop customers.</p>
+</div>
+
+<div class="stat-card">
+    <h3>Total Customers: {{ total_customers }}</h3>
+</div>
+
+<div class="table-container">
+
+    <div class="table-header">
+
+        <form method="GET">
+            <input type="text"
+                   name="search"
+                   placeholder="Search customer..."
+                   value="{{ request.GET.search|default:'' }}">
+
+            <button type="submit">Search</button>
+        </form>
+
+        <a href="{% url 'add_customer' %}" class="primary-btn">
+            + Add Customer
+        </a>
+
+    </div>
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Address</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for customer in customers %}
+
+            <tr>
+                <td>{{ customer.id }}</td>
+                <td>{{ customer.name }}</td>
+                <td>{{ customer.phone }}</td>
+                <td>{{ customer.email|default:"-" }}</td>
+                <td>{{ customer.address|default:"-" }}</td>
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="5">No customers found.</td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

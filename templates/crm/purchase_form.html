@@ -1,0 +1,47 @@
+{% extends 'crm/base.html' %}
+
+{% block title %}Record Purchase | SmartShop AI{% endblock %}
+
+{% block page_heading %}Record Customer Purchase{% endblock %}
+
+{% block content %}
+
+<div class="form-container">
+
+    <h2>Complete Customer Purchase</h2>
+
+    <p>Enter the final purchase details.</p>
+
+    <div class="purchase-customer-info">
+
+        <p>
+            Customer:
+            <strong>{{ lead.customer.name }}</strong>
+        </p>
+
+        <p>
+            Product:
+            <strong>{{ lead.product.name|default:"Not selected" }}</strong>
+        </p>
+
+    </div>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit" class="primary-btn">
+            Confirm Purchase
+        </button>
+
+        <a href="{% url 'leads' %}" class="cancel-btn">
+            Cancel
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}

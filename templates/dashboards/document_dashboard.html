@@ -1,0 +1,56 @@
+{% extends 'crm/base.html' %}
+
+{% block title %}Document Dashboard{% endblock %}
+
+{% block page_heading %}Document Management Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-welcome">
+    <h2>Document Management</h2>
+    <p>Manage and verify customer documents.</p>
+</div>
+
+<div class="stats-grid">
+
+    <div class="stat-card">
+        <h4>Total Documents</h4>
+        <h2>{{ total_documents }}</h2>
+    </div>
+
+    <div class="stat-card">
+        <h4>Pending</h4>
+        <h2>{{ pending_documents }}</h2>
+    </div>
+
+    <div class="stat-card">
+        <h4>Verified</h4>
+        <h2>{{ verified_documents }}</h2>
+    </div>
+
+    <div class="stat-card">
+        <h4>Rejected</h4>
+        <h2>{{ rejected_documents }}</h2>
+    </div>
+
+    <div class="stat-card">
+        <h4>Correction Required</h4>
+        <h2>{{ correction_documents }}</h2>
+    </div>
+
+</div>
+
+<div class="dashboard-actions">
+
+    <a href="{% url 'documents' %}" class="btn btn-primary">
+        Manage Documents
+    </a>
+
+    {% if request.user.is_superuser %}
+    <a href="{% url 'lead_dashboard' %}" class="btn btn-primary">Lead Dashboard</a>
+    <a href="{% url 'bank_dashboard' %}" class="btn btn-primary">Bank Dashboard</a>
+    {% endif %}
+
+</div>
+
+{% endblock %}

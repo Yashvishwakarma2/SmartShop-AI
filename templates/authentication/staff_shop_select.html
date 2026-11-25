@@ -1,0 +1,125 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Select Your Shop | SmartShop AI</title>
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+    <style>
+        .shop-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .shop-card {
+            display: flex;
+            align-items: center;
+            padding: 14px 18px;
+            border: 1.5px solid #dbe3ef;
+            border-radius: 10px;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .shop-card:hover, .shop-card.selected {
+            border-color: #1765df;
+            background: #eff6ff;
+        }
+        .shop-card input[type="radio"] {
+            margin-right: 14px;
+            accent-color: #1765df;
+        }
+        .shop-card .shop-info strong {
+            display: block;
+            font-size: 15px;
+            color: #1e293b;
+        }
+        .shop-card .shop-info small {
+            color: #64748b;
+            font-size: 12px;
+        }
+        .role-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            background: #dbeafe;
+            color: #1765df;
+            margin-bottom: 18px;
+        }
+        .no-shops {
+            text-align: center;
+            padding: 30px;
+            color: #64748b;
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-container" style="max-width: 540px;">
+
+    <h1>SmartShop AI</h1>
+
+    <h2>Select Your Shop</h2>
+
+    {% if user_role %}
+    <div style="text-align:center;">
+        <span class="role-badge">
+            {% if user_role == 'LEAD' %}Lead Manager
+            {% elif user_role == 'DOCUMENT' %}Document Manager
+            {% elif user_role == 'BANK' %}Bank Manager
+            {% endif %}
+        </span>
+    </div>
+    {% endif %}
+
+    <p style="color:#475569; text-align:center; margin-bottom:20px;">
+        Choose which shop/organization you are associated with.
+        Your data will be scoped to this shop only.
+    </p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p class="error">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+
+    {% if shops %}
+    <form method="POST">
+        {% csrf_token %}
+        <div class="shop-list">
+            {% for shop in shops %}
+            <label class="shop-card" for="shop_{{ shop.id }}">
+                <input type="radio" id="shop_{{ shop.id }}" name="shop_id"
+                       value="{{ shop.id }}" required>
+                <div class="shop-info">
+                    <strong>{{ shop.name }}</strong>
+                    <small>Owner: {{ shop.owner.username }} &nbsp;|&nbsp; Type: {{ shop.shop_type }}</small>
+                </div>
+            </label>
+            {% endfor %}
+        </div>
+
+        <button type="submit">Join This Shop</button>
+    </form>
+    {% else %}
+    <div class="no-shops">
+        <p>⚠️ No shops are available yet.</p>
+        <p>Please ask your Super Administrator to create a shop first, then come back and log in.</p>
+        <a href="{% url 'login' %}">← Back to Login</a>
+    </div>
+    {% endif %}
+
+    <p style="margin-top:20px;">
+        <a href="{% url 'login' %}">← Back to Login</a>
+    </p>
+
+</div>
+
+</body>
+</html>
+

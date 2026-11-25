@@ -1,0 +1,147 @@
+{% extends 'crm/base.html' %}
+
+{% block title %}Bank Management | SmartShop AI{% endblock %}
+
+{% block page_heading %}Bank Lead Management{% endblock %}
+
+{% block content %}
+
+<div class="welcome">
+    <h2>Bank Application Management 🏦</h2>
+    <p>Track customer loan applications and their approval status.</p>
+</div>
+
+<!-- Statistics -->
+
+<div class="stats-grid">
+
+    <div class="stat-card">
+        <i class="fa-solid fa-building-columns"></i>
+        <h4>Total Applications</h4>
+        <h2>{{ total_applications }}</h2>
+    </div>
+
+    <div class="stat-card">
+        <i class="fa-solid fa-clock"></i>
+        <h4>Pending</h4>
+        <h2>{{ pending_count }}</h2>
+    </div>
+
+    <div class="stat-card">
+        <i class="fa-solid fa-circle-check"></i>
+        <h4>Approved</h4>
+        <h2>{{ approved_count }}</h2>
+    </div>
+
+    <div class="stat-card">
+        <i class="fa-solid fa-circle-xmark"></i>
+        <h4>Rejected</h4>
+        <h2>{{ rejected_count }}</h2>
+    </div>
+
+</div>
+
+<!-- Applications Table -->
+
+<div class="table-container">
+
+    <h3>Bank Applications</h3>
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>Customer</th>
+                <th>Product</th>
+                <th>Bank</th>
+                <th>Loan Amount</th>
+                <th>Status</th>
+                <th>Update Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for application in applications %}
+
+            <tr>
+
+                <td>
+                    {{ application.lead.customer.name }}
+                </td>
+
+                <td>
+                    {{ application.lead.product.name|default:"-" }}
+                </td>
+
+                <td>
+                    {{ application.bank_name }}
+                </td>
+
+                <td>
+                    ₹{{ application.loan_amount }}
+                </td>
+
+                <td>
+                    <span class="bank-status">
+                        {{ application.get_status_display }}
+                    </span>
+                </td>
+
+                <td>
+
+                    <form method="POST"
+                          action="{% url 'update_bank_status' application.id %}">
+
+                        {% csrf_token %}
+
+                        <select name="status">
+
+                            {% for value, label in application.STATUS_CHOICES %}
+
+                            <option value="{{ value }}"
+                                {% if application.status == value %}
+                                selected
+                                {% endif %}>
+                                {{ label }}
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                        <button type="submit">
+                            Update
+                        </button>
+
+                    </form>
+
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="6">
+                    No bank applications available.
+                </td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="message-box">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,37 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>Shop Registration | SmartShop AI</title>
+
+    <link rel="stylesheet"
+          href="{% static 'css/auth.css' %}">
+
+</head>
+
+<body>
+
+<div class="auth-container">
+
+    <h1>SmartShop AI</h1>
+
+    <h2>Register Your Shop</h2>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit">
+            Register Shop
+        </button>
+
+    </form>
+
+</div>
+
+</body>
+</html>

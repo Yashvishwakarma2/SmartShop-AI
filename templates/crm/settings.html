@@ -1,0 +1,226 @@
+{% extends 'crm/base.html' %}
+
+{% block title %}Settings | SmartShop AI{% endblock %}
+
+{% block page_heading %}Settings & Preferences{% endblock %}
+
+{% block content %}
+
+<div class="welcome" style="margin-bottom: 24px;">
+    <h2>Account & System Settings ⚙️</h2>
+    <p>Manage your personal profile, business details, security, and dashboard keys.</p>
+</div>
+
+{% if messages %}
+    <div style="margin-bottom: 20px;">
+        {% for message in messages %}
+            <div style="padding: 12px 18px; border-radius: 8px; margin-bottom: 10px; font-size: 14px; {% if message.tags == 'error' %}background:#fee2e2; color:#991b1b; border:1px solid #f87171;{% else %}background:#ecfdf5; color:#065f46; border:1px solid #6ee7b7;{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px;">
+
+    <!-- ── 1. User Profile Settings ── -->
+    <div class="dashboard-section" style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0;">
+            <i class="fa-solid fa-user-gear" style="font-size: 22px; color: #1765df;"></i>
+            <div>
+                <h3 style="margin: 0; font-size: 17px; color: #1e293b;">User Profile</h3>
+                <small style="color: #64748b;">Update your personal details</small>
+            </div>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_profile">
+
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 5px;">Username</label>
+                <input type="text" value="{{ request.user.username }}" disabled style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc; color: #64748b; font-size: 14px;">
+                <small style="color: #94a3b8; font-size: 11px;">Username cannot be changed</small>
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 5px;">First Name</label>
+                {{ profile_form.first_name }}
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 5px;">Last Name</label>
+                {{ profile_form.last_name }}
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 5px;">Email Address</label>
+                {{ profile_form.email }}
+            </div>
+
+            <button type="submit" class="primary-btn" style="width: 100%; padding: 11px; font-size: 14px; border-radius: 6px; cursor: pointer;">
+                Save Profile Changes
+            </button>
+        </form>
+    </div>
+
+    <!-- ── 2. Security / Change Password ── -->
+    <div class="dashboard-section" style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0;">
+            <i class="fa-solid fa-lock" style="font-size: 22px; color: #dc2626;"></i>
+            <div>
+                <h3 style="margin: 0; font-size: 17px; color: #1e293b;">Security &amp; Password</h3>
+                <small style="color: #64748b;">Update your login password</small>
+            </div>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="change_password">
+
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 5px;">Current Password *</label>
+                {{ password_form.old_password }}
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 5px;">New Password *</label>
+                {{ password_form.new_password1 }}
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 5px;">Confirm New Password *</label>
+                {{ password_form.new_password2 }}
+            </div>
+
+            <button type="submit" class="primary-btn" style="width: 100%; padding: 11px; font-size: 14px; border-radius: 6px; background: #dc2626; cursor: pointer;">
+                Change Password
+            </button>
+        </form>
+    </div>
+
+    <!-- ── 3. Shop & Business Settings (Admin / Owner) ── -->
+    {% if shop_form %}
+    <div class="dashboard-section" style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0;">
+            <i class="fa-solid fa-store" style="font-size: 22px; color: #059669;"></i>
+            <div>
+                <h3 style="margin: 0; font-size: 17px; color: #1e293b;">Shop &amp; Business Profile</h3>
+                <small style="color: #64748b;">Manage organization information</small>
+            </div>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_shop">
+
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 5px;">Shop / Business Name</label>
+                {{ shop_form.name }}
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 5px;">Business Type</label>
+                {{ shop_form.shop_type }}
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 5px;">Mobile / Phone</label>
+                {{ shop_form.phone }}
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 5px;">Shop Address</label>
+                {{ shop_form.address }}
+            </div>
+
+            <button type="submit" class="primary-btn" style="width: 100%; padding: 11px; font-size: 14px; border-radius: 6px; background: #059669; cursor: pointer;">
+                Update Shop Details
+            </button>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- ── 4. Account & Workspace Info ── -->
+    <div class="dashboard-section" style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0;">
+            <i class="fa-solid fa-id-card" style="font-size: 22px; color: #d97706;"></i>
+            <div>
+                <h3 style="margin: 0; font-size: 17px; color: #1e293b;">Workspace &amp; Role Info</h3>
+                <small style="color: #64748b;">Your account access details</small>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px; font-size: 14px;">
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9;">
+                <span style="color: #64748b;">Account Type:</span>
+                <strong>
+                    {% if request.user.is_superuser %}
+                        Super Administrator
+                    {% elif request.user.groups.all.0.name %}
+                        {{ request.user.groups.all.0.name }}
+                    {% else %}
+                        Shop Owner
+                    {% endif %}
+                </strong>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9;">
+                <span style="color: #64748b;">Associated Shop:</span>
+                <strong>{{ shop.name|default:"Not linked" }}</strong>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9;">
+                <span style="color: #64748b;">Account Status:</span>
+                <span style="color: #16a34a; font-weight: 600;">Active</span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                <span style="color: #64748b;">Member Since:</span>
+                <span>{{ request.user.date_joined|date:"d M Y" }}</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ── 5. Static Dashboard Access Keys (Super Administrator Only) ── -->
+{% if access_codes %}
+<div class="dashboard-section" style="background: white; border-radius: 12px; padding: 24px; margin-top: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <i class="fa-solid fa-key" style="font-size: 22px; color: #2563eb;"></i>
+            <div>
+                <h3 style="margin: 0; font-size: 17px; color: #1e293b;">Static Dashboard Access Keys</h3>
+                <small style="color: #64748b;">Manage registration keys for your organization's dashboards</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        {% for value, label, code in access_codes %}
+        <div class="stat-card" style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h4 style="margin: 0; font-size: 15px;">{{ label }}</h4>
+                <span class="badge-count" style="font-size: 11px;">Active Key</span>
+            </div>
+            <strong style="margin: 12px 0 6px; font-size: 22px; color: #2563eb; letter-spacing: 0.05em; display: block; font-family: monospace;">
+                {{ code }}
+            </strong>
+            <small style="color: #64748b; display: block; margin-bottom: 14px;">Used during signup for {{ label }}</small>
+
+            <form method="POST" style="display: flex; gap: 8px;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update_code">
+                <input type="hidden" name="dashboard" value="{{ value }}">
+                <input type="text" name="custom_code" placeholder="New key" maxlength="12" required style="padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; flex: 1; text-transform: uppercase;">
+                <button type="submit" class="btn btn-primary" style="padding: 7px 14px; font-size: 12px;">Update</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+

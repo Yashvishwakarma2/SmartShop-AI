@@ -1,0 +1,33 @@
+{% extends 'crm/base.html' %}
+
+{% block title %}Add Customer | SmartShop AI{% endblock %}
+
+{% block page_heading %}Add Customer{% endblock %}
+
+{% block content %}
+
+<div class="form-container">
+
+    <h2>Register New Customer</h2>
+
+    <p>Enter the customer's details below.</p>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit" class="primary-btn">
+            Save Customer
+        </button>
+
+        <a href="{% url 'customers' %}" class="cancel-btn">
+            Cancel
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}

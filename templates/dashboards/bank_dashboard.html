@@ -1,0 +1,61 @@
+{% extends 'crm/base.html' %}
+
+{% block title %}Bank Dashboard{% endblock %}
+
+{% block page_heading %}Bank Management Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-welcome">
+    <h2>Bank Application Management</h2>
+    <p>Monitor customer loan applications.</p>
+</div>
+
+<div class="stats-grid">
+
+    <div class="stat-card">
+        <h4>Total Applications</h4>
+        <h2>{{ total_applications }}</h2>
+    </div>
+
+    <div class="stat-card">
+        <h4>Pending</h4>
+        <h2>{{ pending_applications }}</h2>
+    </div>
+
+    <div class="stat-card">
+        <h4>Under Review</h4>
+        <h2>{{ review_applications }}</h2>
+    </div>
+
+    <div class="stat-card">
+        <h4>Approved</h4>
+        <h2>{{ approved_applications }}</h2>
+    </div>
+
+    <div class="stat-card">
+        <h4>Rejected</h4>
+        <h2>{{ rejected_applications }}</h2>
+    </div>
+
+    <div class="stat-card">
+        <h4>Total Loan Amount</h4>
+        <h2>₹{{ total_loan_amount }}</h2>
+    </div>
+
+</div>
+
+<div class="dashboard-actions">
+
+    <a href="{% url 'banks' %}" class="btn btn-primary">
+        Manage Bank Applications
+    </a>
+
+    {% if request.user.is_superuser %}
+    <a href="{% url 'lead_dashboard' %}" class="btn btn-primary">Lead Dashboard</a>
+    <a href="{% url 'document_dashboard' %}" class="btn btn-primary">Document Dashboard</a>
+    {% endif %}
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,194 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}SmartShop AI{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+<div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <div class="logo">
+            <i class="fa-solid fa-store"></i>
+            SmartShop <span>AI</span>
+        </div>
+
+        <nav>
+            {% if request.user.groups.all.0.name == "Lead Manager" %}
+                {# ── Lead Manager: only lead-relevant links ── #}
+                <a href="{% url 'lead_dashboard' %}">
+                    <i class="fa-solid fa-chart-line"></i> Dashboard
+                </a>
+                <a href="{% url 'leads' %}">
+                    <i class="fa-solid fa-bullseye"></i> Leads
+                </a>
+                <a href="{% url 'customers' %}">
+                    <i class="fa-solid fa-users"></i> Customers
+                </a>
+                <a href="{% url 'followups' %}">
+                    <i class="fa-solid fa-bell"></i> Follow-ups
+                </a>
+
+            {% elif request.user.groups.all.0.name == "Document Manager" %}
+                {# ── Document Manager ── #}
+                <a href="{% url 'document_dashboard' %}">
+                    <i class="fa-solid fa-chart-line"></i> Dashboard
+                </a>
+                <a href="{% url 'documents' %}">
+                    <i class="fa-solid fa-file-lines"></i> Documents
+                </a>
+
+            {% elif request.user.groups.all.0.name == "Bank Manager" %}
+                {# ── Bank Manager ── #}
+                <a href="{% url 'bank_dashboard' %}">
+                    <i class="fa-solid fa-chart-line"></i> Dashboard
+                </a>
+                <a href="{% url 'banks' %}">
+                    <i class="fa-solid fa-building-columns"></i> Bank Leads
+                </a>
+
+            {% elif request.user.is_superuser %}
+                {# ── Superuser: all links ── #}
+                <a href="{% url 'dashboard' %}">
+                    <i class="fa-solid fa-chart-line"></i> Dashboard
+                </a>
+                <div class="dashboard-links">
+                    <small>WORKSPACE DASHBOARD</small>
+                    <a href="{% url 'superuser_dashboard' %}">
+                        <i class="fa-solid fa-shield-halved"></i> Super Dashboard
+                    </a>
+                    <a href="{% url 'lead_dashboard' %}">
+                        <i class="fa-solid fa-bullseye"></i> Lead Dashboard
+                    </a>
+                    <a href="{% url 'document_dashboard' %}">
+                        <i class="fa-solid fa-file-lines"></i> Document Dashboard
+                    </a>
+                    <a href="{% url 'bank_dashboard' %}">
+                        <i class="fa-solid fa-building-columns"></i> Bank Dashboard
+                    </a>
+                </div>
+                <a href="{% url 'customers' %}">
+                    <i class="fa-solid fa-users"></i> Customers
+                </a>
+                <a href="{% url 'products' %}">
+                    <i class="fa-solid fa-box"></i> Products
+                </a>
+                <a href="{% url 'leads' %}">
+                    <i class="fa-solid fa-bullseye"></i> Leads
+                </a>
+                <a href="{% url 'followups' %}">
+                    <i class="fa-solid fa-bell"></i> Follow-ups
+                </a>
+                <a href="{% url 'documents' %}">
+                    <i class="fa-solid fa-file-lines"></i> Documents
+                </a>
+                <a href="{% url 'banks' %}">
+                    <i class="fa-solid fa-building-columns"></i> Bank Leads
+                </a>
+                <a href="{% url 'purchases' %}">
+                    <i class="fa-solid fa-cart-shopping"></i> Purchases
+                </a>
+                <a href="{% url 'reports' %}">
+                    <i class="fa-solid fa-chart-pie"></i> Reports
+                </a>
+                <a href="{% url 'ai_predictions' %}">
+                    <i class="fa-solid fa-brain"></i> AI Predictions
+                </a>
+
+            {% else %}
+                {# ── Shop Owner: full CRM ── #}
+                <a href="{% url 'dashboard' %}">
+                    <i class="fa-solid fa-chart-line"></i> Dashboard
+                </a>
+                <a href="{% url 'customers' %}">
+                    <i class="fa-solid fa-users"></i> Customers
+                </a>
+                <a href="{% url 'products' %}">
+                    <i class="fa-solid fa-box"></i> Products
+                </a>
+                <a href="{% url 'leads' %}">
+                    <i class="fa-solid fa-bullseye"></i> Leads
+                </a>
+                <a href="{% url 'followups' %}">
+                    <i class="fa-solid fa-bell"></i> Follow-ups
+                </a>
+                <a href="{% url 'documents' %}">
+                    <i class="fa-solid fa-file-lines"></i> Documents
+                </a>
+                <a href="{% url 'banks' %}">
+                    <i class="fa-solid fa-building-columns"></i> Bank Leads
+                </a>
+                <a href="{% url 'purchases' %}">
+                    <i class="fa-solid fa-cart-shopping"></i> Purchases
+                </a>
+                <a href="{% url 'reports' %}">
+                    <i class="fa-solid fa-chart-pie"></i> Reports
+                </a>
+                <a href="{% url 'ai_predictions' %}">
+                    <i class="fa-solid fa-brain"></i> AI Predictions
+                </a>
+            {% endif %}
+
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.12);">
+                <a href="{% url 'settings' %}">
+                    <i class="fa-solid fa-gear"></i> Settings
+                </a>
+            </div>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <form method="POST" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </button>
+            </form>
+        </div>
+
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <header class="topbar">
+            <div>
+                <h3>{% block page_heading %}Dashboard{% endblock %}</h3>
+                <p>Customer Relationship & Purchase Management</p>
+            </div>
+
+            <a href="{% url 'settings' %}" class="profile" style="text-decoration:none; color:inherit;" title="Go to Settings">
+                <i class="fa-solid fa-circle-user"></i>
+                {{ request.user.username }}
+                {% if request.user.is_superuser %}
+                    <span class="badge-count" style="font-size: 11px; margin-left: 6px;">Super Admin</span>
+                {% elif request.user.groups.all.0.name %}
+                    <span class="badge-count" style="font-size: 11px; margin-left: 6px;">{{ request.user.groups.all.0.name }}</span>
+                {% endif %}
+            </a>
+        </header>
+
+        <section class="page-content">
+            {% block content %}
+            {% endblock %}
+        </section>
+
+    </main>
+
+</div>
+
+</body>
+</html>

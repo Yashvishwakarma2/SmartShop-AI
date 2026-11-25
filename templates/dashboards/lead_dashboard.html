@@ -1,0 +1,174 @@
+{% extends 'crm/base.html' %}
+
+{% block title %}Lead Dashboard{% endblock %}
+
+{% block page_heading %}Lead Management Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-welcome">
+    <h2>Lead Management {% if lead_dashboard_name %}
+        <span style="font-size: 18px; color: #1765df;">
+             {{ lead.assigned_to.username  }}</span>{% endif %}</h2>
+    {% if is_lead_manager %}
+    <p>Viewing your assigned Lead Dashboard &mdash; only leads and customers assigned to you are displayed.</p>
+    {% elif selected_staff %}
+    <p>Viewing Lead Dashboard for: <strong style="color:#1765df;">{{ selected_staff.username }}</strong> &mdash; <a
+            href="{% url 'lead_dashboard' %}" style="color:#2563eb; font-weight:600;">Show All Leads</a></p>
+    {% else %}
+    <p>Manage customers, leads and follow-ups across all Lead Dashboards.</p>
+    {% endif %}
+</div>
+
+{% if not is_lead_manager and all_lead_dashboards %}
+<!-- Switcher for Superuser -->
+<div
+    style="background:white; border:1px solid #e2e8f0; border-radius:10px; padding:12px 18px; margin-bottom:20px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+    <span style="font-size:13px; font-weight:600; color:#475569;">Switch Lead Dashboard:</span>
+    <a href="{% url 'lead_dashboard' %}"
+        class="btn {% if not selected_staff %}btn-primary{% else %}btn-secondary{% endif %}"
+        style="padding:5px 12px; font-size:12px; border-radius:6px; {% if selected_staff %}background:#f1f5f9; color:#334155;{% endif %}">
+        All Dashboards
+    </a>
+    {% for sp in all_lead_dashboards %}
+    <a href="{% url 'lead_dashboard' %}?staff_id={{ sp.user.id }}"
+        class="btn {% if selected_staff.id == sp.user.id %}btn-primary{% else %}btn-secondary{% endif %}"
+        style="padding:5px 12px; font-size:12px; border-radius:6px; {% if selected_staff.id != sp.user.id %}background:#f1f5f9; color:#334155;{% endif %}">
+        <i class="fa-solid fa-user" style="font-size:10px;"></i> {{ sp.user.username }}
+    </a>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="stats-grid">
+
+    <div class="stat-card">
+        <h4>Total Customers</h4>
+        <h2>{{ total_customers }}</h2>
+    </div>
+
+    <div class="stat-card">
+        <h4>Total Leads</h4>
+        <h2>{{ total_leads }}</h2>
+    </div>
+
+    <div class="stat-card">
+        <h4>New Leads</h4>
+        <h2>{{ new_leads }}</h2>
+    </div>
+
+    <div class="stat-card">
+        <h4>Follow-ups</h4>
+        <h2>{{ followup_leads }}</h2>
+    </div>
+
+    <div class="stat-card">
+        <h4>Converted Leads</h4>
+        <h2>{{ converted_leads }}</h2>
+    </div>
+
+    <div class="stat-card" style="border-left: 4px solid #059669;">
+        <h4>Verified Documents</h4>
+        <h2 style="color:#059669;">{{ verified_docs }}</h2>
+        <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
+            <span style="color:#d97706; font-weight:600;">{{ pending_docs }}</span> pending review
+        </div>
+    </div>
+
+    <div class="stat-card" style="border-left: 4px solid #2563eb;">
+        <h4>Bank Approved</h4>
+        <h2 style="color:#2563eb;">{{ approved_banks }}</h2>
+        <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
+            <span style="color:#0284c7; font-weight:600;">{{ review_banks }}</span> in review
+        </div>
+    </div>
+
+</div>
+
+<div class="dashboard-actions">
+
+    <a href="{% url 'leads' %}{% if selected_staff %}?staff_id={{ selected_staff.id }}{% endif %}"
+        class="btn btn-primary">
+        Manage Leads
+    </a>
+
+    <a href="{% url 'customers' %}{% if selected_staff %}?staff_id={{ selected_staff.id }}{% endif %}"
+        class="btn btn-primary">
+        Manage Customers
+    </a>
+
+    <a href="{% url 'followups' %}" class="btn btn-primary">
+        View Follow-ups
+    </a>
+
+    {% if not is_lead_manager %}
+    <a href="{% url 'add_lead' %}{% if selected_staff %}?assigned_to={{ selected_staff.id }}{% endif %}" class="btn"
+        style="background:#eff6ff; color:#1765df; border:1px solid #bfdbfe;">
+        + Create Lead For This Dashboard
+    </a>
+    {% endif %}
+
+    {% if request.user.is_superuser %}
+    <a href="{% url 'document_dashboard' %}" class="btn btn-primary">Document Dashboard</a>
+    <a href="{% url 'bank_dashboard' %}" class="btn btn-primary">Bank Dashboard</a>
+    {% endif %}
+
+</div>
+
+{% if leads_list %}
+<div class="dashboard-section" style="margin-top:24px;">
+    <h3 style="margin-bottom:12px;">Recent Leads {% if lead_dashboard_name %}({{ lead_dashboard_name }}){% endif %}</h3>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Customer</th>
+                    <th>Product</th>
+                    <th>Assigned Dashboard</th>
+                    <th>Status</th>
+                    <th>Document Status</th>
+                    <th>Bank Status</th>
+                    <th>Expected Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lead in leads_list %}
+                <tr>
+                    <td><strong>{{ lead.customer.name }}</strong></td>
+                    <td>{{ lead.product.name|default:"-" }}</td>
+                    <td> 
+                        <span style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:12px; font-size:12px; font-weight:600;">
+                        {{ lead.assigned_to.username|default:"Unassigned" }}
+                    </span>
+                    </td>
+                    <td><span class="lead-status">{{ lead.get_status_display }}</span></td>
+                    <td>
+                        <span
+                            style="display:inline-flex; align-items:center; gap:5px; background:#{{ lead.document_status_badge.bg }}; color:{{ lead.document_status_badge.color }}; border:1px solid {{ lead.document_status_badge.color }}33; padding:2px 8px; border-radius:12px; font-size:12px; font-weight:600;">
+                            <i class="fa-solid fa-{{ lead.document_status_badge.icon }}" style="font-size:10px;"></i>
+                            {{ lead.document_status_badge.label }}
+                        </span>
+                        {% if lead.document_status_badge.doc_name %}
+                        <div style="font-size:11px; color:#64748b; margin-top:2px;">{{ lead.document_status_badge.doc_name }}</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span
+                            style="display:inline-flex; align-items:center; gap:5px; background:#{{ lead.bank_status_badge.bg }}; color:{{ lead.bank_status_badge.color }}; border:1px solid {{ lead.bank_status_badge.color }}33; padding:2px 8px; border-radius:12px; font-size:12px; font-weight:600;">
+                            <i class="fa-solid fa-{{ lead.bank_status_badge.icon }}" style="font-size:10px;"></i>
+                            {{ lead.bank_status_badge.label }}
+                        </span>
+                        {% if lead.bank_status_badge.bank_name %}
+                        <div style="font-size:11px; color:#64748b; margin-top:2px;">{{ lead.bank_status_badge.bank_name }}{% if lead.bank_status_badge.loan_amount %} &bull; ₹{{ lead.bank_status_badge.loan_amount }}{% endif %}</div>
+                        {% endif %}
+                    </td>
+                    <td>{{ lead.expected_purchase_date|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
